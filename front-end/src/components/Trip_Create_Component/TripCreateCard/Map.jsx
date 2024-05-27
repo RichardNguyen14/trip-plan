@@ -39,6 +39,7 @@ const Map = () => {
   const locationList = useSelector((state) => state.tripCreate.markerList);
   const itemIndex = useSelector((state) => state.tripCreate.index);
 
+  console.log("123",locationList)
   useEffect(() => {
     // Initialize map only once
     if (!map.current) {

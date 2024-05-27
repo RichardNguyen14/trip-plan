@@ -41,12 +41,19 @@ const LocationDetail = () => {
   const locationDisplay = locationDetail.filter(
     (location) => location.id === parseInt(filterby),
   )[0];
+  const [currentDate, setCurrentDate] = useState("");
+  useEffect(() => {
+    const today = new Date();
+    const formattedDate = today.toISOString().split("T")[0]; // Định dạng ngày thành YYYY-MM-DD
+    setCurrentDate(formattedDate);
+  }, []);
 
   useEffect(() => {
     fetch(`${API}comment/location/${parseInt(filterby)}`)
       .then((response) => response.json())
       .then((result) => {
         setAllReview(result.data);
+        console.log("tesst", result.data);
       })
       .catch((error) => console.error(error));
   }, [filterby]);
@@ -72,17 +79,23 @@ const LocationDetail = () => {
     })
       .then((response) => response.json())
       .then((result) => {
-        // Cập nhật danh sách review nếu cần thiết
+        // Update review list if necessary
         setAllReview((prevReviews) => [...prevReviews, result.data]);
+        // Navigate to the current page to force reload
+        navigate(0);
       })
-      .catch((error) => console.error("Error:", error));
+      .catch((error) => {
+        console.error("Error:", error);
+        alert("Failed to submit review"); // Optionally alert the user
+      });
   };
 
-  const stars = (index) => {
+  const stars = (reviewId) => {
     const star = [];
+    const review = allReview.find((r) => r.id === reviewId);
 
-    if (allReview && allReview[index]) {
-      const rating = allReview[index].rating;
+    if (review) {
+      const rating = review.rating;
 
       if (!rating || rating <= 0) {
         for (let i = 0; i < 5; i++) {
@@ -350,7 +363,7 @@ const LocationDetail = () => {
               <div className="flex flex-col">
                 <div className="mb-[8px] flex">
                   <div className="flex items-center text-[17px] font-[600]">
-                    {stars(review.id - 1)}
+                    {stars(review.id)}
                   </div>
                   <div className="mx-[8px] text-[14px] font-[400]">|</div>
                   <div className="text-[14px] font-[400] capitalize">
@@ -371,7 +384,7 @@ const LocationDetail = () => {
             onSubmit={handleReviewSubmit}
             onClose={() => setShowReviewForm(false)}
             userID={user_id}
-            day={day}
+            day={currentDate} // Truyền ngày hiện tại như là một prop
             locationID={parseInt(filterby)}
           />
         )}
